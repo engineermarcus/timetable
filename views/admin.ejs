@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-size: 45px; /* Increase the base font size */
+        }
+        th, td {
+            font-size: 45px; /* Increase table text size */
+            padding: 12px; /* Add more spacing */
+        }
+        button, a {
+            font-size: 38px; /* Increase button text size */
+        }
+    </style>
+</head>
+<body class="p-8 bg-gray-100">
+    <div class="max-w-5xl mx-auto bg-white shadow-md rounded-lg p-6">
+        <h1 class="text-4xl font-bold mb-4 text-gray-700">Manage Timetable</h1>
+
+        <form action="/admin/add" method="POST" class="mb-4">
+            <input type="text" name="day" placeholder="Day" class="border p-2 rounded">
+            <input type="text" name="time" placeholder="Time" class="border p-2 rounded">
+            <input type="text" name="lesson" placeholder="Lesson" class="border p-2 rounded">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Add Lesson</button>
+        </form>
+
+        <table class="w-full border-collapse border border-gray-300">
+            <thead>
+                <tr class="bg-gray-200">
+                    <th class="border border-gray-300 p-2">Day</th>
+                    <th class="border border-gray-300 p-2">Time</th>
+                    <th class="border border-gray-300 p-2">Lesson</th>
+                    <th class="border border-gray-300 p-2">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% let lastDay = null; %>
+                <% timetable.forEach((row, index) => { %>
+                    <tr class="border border-gray-300">
+                        <% if (row.day !== lastDay) { %>
+                            <%
+                                let dayCount = timetable.filter(r => r.day === row.day).length;
+                            %>
+                            <td class="border border-gray-300 p-2 text-lg font-bold" rowspan="<%= dayCount %>">
+                                <%= row.day %>
+                            </td>
+                        <% } %>
+                        <td class="border border-gray-300 p-2 editable" contenteditable="true" data-id="<%= row._id %>" data-field="time"><%= row.time %></td>
+                        <td class="border border-gray-300 p-2 editable" contenteditable="true" data-id="<%= row._id %>" data-field="lesson"><%= row.lesson %></td>
+                        <td class="border border-gray-300 p-2">
+                            <button id="save-<%= row._id %>" class="bg-blue-600 text-white px-4 py-1 rounded hover:bg-green-700" style="display: none;">Save Changes</button>
+                            <form action="/admin/delete/<%= row._id %>" method="POST" style="display: inline;">
+                                <button type="submit" class="bg-red-600 text-white px-4 py-1 rounded hover:bg-red-700">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    <% lastDay = row.day; %>
+                <% }); %>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="flex justify-between mb-4">
+        <a href="/" class="bg-orange-600 text-white px-6 py-2 rounded hover:bg-yellow-600">See Timetable</a>
+        <a href="/admin/login" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">Logout</a>
+    </div>
+
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+      // Show "Save Changes" button when content is edited
+      document.querySelectorAll(".editable").forEach(cell => {
+          cell.addEventListener("input", function () {
+              const rowId = this.getAttribute("data-id");
+              document.getElementById(`save-${rowId}`).style.display = "inline-block";
+          });
+      });
+  
+      // Add event listener to all "Save Changes" buttons
+      document.querySelectorAll("button[id^='save-']").forEach(button => {
+          button.addEventListener("click", function () {
+              const rowId = this.id.replace("save-", "");
+  
+              const updatedData = {
+                  time: document.querySelector(`[data-id="${rowId}"][data-field="time"]`).innerText.trim(),
+                  lesson: document.querySelector(`[data-id="${rowId}"][data-field="lesson"]`).innerText.trim()
+              };
+  
+              fetch(`/admin/update/${rowId}`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(updatedData)
+              })
+              .then(response => response.text())  // Get raw text instead of JSON
+              .then(text => {
+                  console.log("Server Response:", text);  // Log output to check response
+                  console.log("Server Response: " + text);  // Show response in alert
+                  
+                  let data;
+                  try {
+                      data = JSON.parse(text);  // Try parsing JSON
+                  } catch (error) {
+                      alert("Invalid JSON response from server!");
+                      return;
+                  }
+              
+                  if (data.success) {
+                      
+                      document.getElementById(`save-${rowId}`).style.display = "none";
+                  } else {
+                      console.log("Update failed!");
+                  }
+              })
+              .catch(error => alert("Error: " + error));
+          });
+      });
+  });
+    </script>
+</body>
+</html>
