@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coming Soon</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Redirect after 5 seconds (Optional)
+        setTimeout(function() {
+            window.location.href = "/"; // Change this to your desired page
+        }, 5000);
+    </script>
+</head>
+<body class="bg-gray-900 flex items-center justify-center min-h-screen">
+
+    <div class="text-center bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+        <h1 class="text-white text-2xl font-semibold">Coming Soon</h1>
+        <p class="text-green-400 text-lg mt-2">This page is still under configuration. </p>
+        <p class="text-gray-400 mt-4">Redirecting in <span id="countdown">5</span> seconds...</p>
+    </div>
+
+    <script>
+        // Countdown Timer Display
+        let countdown = 5;
+        const countdownElement = document.getElementById("countdown");
+
+        function updateCountdown() {
+            countdownElement.innerText = countdown;
+            countdown--;
+            if (countdown >= 0) {
+                setTimeout(updateCountdown, 1000);
+            }
+        }
+
+        updateCountdown(); // Start countdown
+    </script>
+
+</body>
+</html>

@@ -70,5 +70,8 @@ router.post('/delete/:id', async (req, res) => {
 router.get('/logout', (req, res) => {
     req.session.destroy(() => res.redirect('/admin/login'));
 });
-
+router.get("/books",(req,res) => {
+    filePath = path.join(__dirname,"books.html")
+    res.sendFile(filePath)	
+});
 module.exports = router;
